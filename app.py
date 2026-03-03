@@ -14,12 +14,56 @@ with open('model/phishing_model.pkl', 'rb') as f:
 HISTORY_FILE = 'model/history.json'
 
 TRUSTED_DOMAINS = [
-    'google.com', 'youtube.com', 'facebook.com', 'twitter.com', 'x.com',
-    'instagram.com', 'microsoft.com', 'apple.com', 'amazon.com',
-    'wikipedia.org', 'github.com', 'linkedin.com', 'yahoo.com',
-    'netflix.com', 'whatsapp.com', 'tiktok.com', 'reddit.com',
-    'stackoverflow.com', 'gmail.com', 'outlook.com', 'bing.com'
+    # بحث وتكنولوجيا
+    'google.com', 'bing.com', 'yahoo.com', 'duckduckgo.com', 'baidu.com',
+    'microsoft.com', 'apple.com', 'amazon.com', 'adobe.com', 'oracle.com',
+    'salesforce.com', 'ibm.com', 'intel.com', 'nvidia.com', 'amd.com',
+    
+    # سوشيال ميديا
+    'facebook.com', 'instagram.com', 'twitter.com', 'x.com', 'linkedin.com',
+    'tiktok.com', 'snapchat.com', 'pinterest.com', 'reddit.com', 'tumblr.com',
+    'whatsapp.com', 'telegram.org', 'discord.com', 'twitch.tv',
+
+    # فيديو وترفيه
+    'youtube.com', 'netflix.com', 'spotify.com', 'soundcloud.com',
+    'vimeo.com', 'dailymotion.com', 'hulu.com', 'disneyplus.com',
+
+    # إيميل وتخزين
+    'gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'protonmail.com',
+    'icloud.com', 'dropbox.com', 'drive.google.com', 'onedrive.live.com',
+    'box.com', 'mega.nz',
+
+    # تطوير وتقنية
+    'github.com', 'gitlab.com', 'stackoverflow.com', 'dev.to',
+    'medium.com', 'hashnode.com', 'codepen.io', 'replit.com',
+    'heroku.com', 'onrender.com', 'vercel.app', 'netlify.app',
+    'cloudflare.com', 'aws.amazon.com', 'azure.microsoft.com',
+
+    # أخبار ومعلومات
+    'wikipedia.org', 'bbc.com', 'cnn.com', 'reuters.com', 'bloomberg.com',
+    'nytimes.com', 'theguardian.com', 'aljazeera.net', 'youm7.com',
+    'masrawy.com', 'elwatannews.com', 'shorouk news.com',
+
+    # تسوق
+    'amazon.com', 'ebay.com', 'aliexpress.com', 'noon.com', 'jumia.com',
+    'souq.com', 'namshi.com',
+
+    # بنوك وخدمات مالية
+    'paypal.com', 'stripe.com', 'visa.com', 'mastercard.com',
+    'cib.com.eg', 'nbe.com.eg', 'banquemisr.com',
+
+    # تعليم
+    'coursera.org', 'udemy.com', 'edx.org', 'khanacademy.org',
+    'duolingo.com', 'quora.com', 'academia.edu',
+
+    # حكومة مصرية
+    'egypt.gov.eg', 'moe.gov.eg', 'mohe.gov.eg',
+
+    # ذكاء اصطناعي
+    'claude.ai', 'anthropic.com', 'openai.com', 'chatgpt.com',
+    'gemini.google.com', 'copilot.microsoft.com', 'huggingface.co',
 ]
+
 
 def load_history():
     if os.path.exists(HISTORY_FILE):
