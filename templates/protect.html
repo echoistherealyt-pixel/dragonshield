@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark" data-lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DragonShield — مركز الحماية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Orbitron:wght@700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #FFD700; --gold2: #FFA500; --gold3: #B8860B; --red: #ff2d55; --green: #00ff88; }
+        [data-theme="dark"] { --bg: #080808; --bg2: #0f0f0f; --card: rgba(255,215,0,0.04); --border: rgba(255,215,0,0.15); --text: #ffffff; --text2: rgba(255,255,255,0.6); --text3: rgba(255,255,255,0.3); --nav-bg: rgba(8,8,8,0.9); --input-bg: rgba(255,255,255,0.05); }
+        [data-theme="light"] { --bg: #f5f0e8; --bg2: #ede8d8; --card: rgba(184,134,11,0.06); --border: rgba(184,134,11,0.25); --text: #1a1200; --text2: rgba(26,18,0,0.7); --text3: rgba(26,18,0,0.4); --nav-bg: rgba(245,240,232,0.95); --input-bg: rgba(0,0,0,0.05); }
+        * { margin:0; padding:0; box-sizing:border-box; transition: background 0.4s, color 0.3s; }
+        body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; min-height:100vh; }
+        .bg { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+        .bg::before { content:''; position:absolute; width:600px; height:600px; background:radial-gradient(circle,rgba(255,215,0,0.06) 0%,transparent 70%); top:-200px; right:-200px; animation:pulse 8s ease-in-out infinite; }
+        .bg::after { content:''; position:absolute; width:400px; height:400px; background:radial-gradient(circle,rgba(255,165,0,0.04) 0%,transparent 70%); bottom:-100px; left:-100px; animation:pulse 10s ease-in-out infinite reverse; }
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.3);opacity:1} }
+        .grid-bg { position:fixed; inset:0; z-index:0; pointer-events:none; background-image:linear-gradient(rgba(255,215,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,215,0,0.03) 1px,transparent 1px); background-size:60px 60px; }
+        .content { position:relative; z-index:1; }
+        nav { display:flex; justify-content:space-between; align-items:center; padding:18px 60px; border-bottom:1px solid var(--border); backdrop-filter:blur(20px); position:sticky; top:0; z-index:100; background:var(--nav-bg); }
+        .logo { font-family:'Orbitron',monospace; font-size:1.2rem; color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.4); letter-spacing:3px; cursor:pointer; }
+        .logo span { color:var(--text); }
+        .nav-controls { display:flex; gap:10px; align-items:center; }
+        .ctrl-btn { padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text2); font-family:'Cairo',sans-serif; font-size:0.8rem; cursor:pointer; transition:all 0.3s; }
+        .ctrl-btn:hover { border-color:var(--gold); color:var(--gold); }
+        .back-btn { padding:8px 20px; border-radius:8px; border:none; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#000; font-family:'Cairo',sans-serif; font-size:0.85rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
+        .back-btn:hover { transform:scale(1.05); box-shadow:0 0 20px rgba(255,215,0,0.3); }
+        .hero { text-align:center; padding:80px 20px 50px; }
+        .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.25); border-radius:50px; padding:8px 22px; font-size:0.85rem; color:var(--gold); margin-bottom:24px; }
+        .badge-dot { width:8px; height:8px; background:var(--gold); border-radius:50%; animation:blink 1.5s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+        .hero h1 { font-size:clamp(2rem,5vw,4rem); font-weight:900; margin-bottom:16px; }
+        .highlight { background:linear-gradient(135deg,var(--gold),var(--gold2),var(--gold3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero p { color:var(--text2); font-size:1rem; max-width:500px; margin:0 auto; line-height:1.8; }
+        .tabs { display:flex; gap:8px; justify-content:center; padding:30px 20px 0; flex-wrap:wrap; }
+        .tab { padding:12px 24px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text2); font-family:'Cairo',sans-serif; font-size:0.9rem; cursor:pointer; transition:all 0.3s; }
+        .tab:hover { border-color:var(--gold); color:var(--gold); }
+        .tab.active { background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#000; border-color:transparent; font-weight:700; }
+        .panels { max-width:800px; margin:0 auto; padding:40px 20px 80px; }
+        .panel { display:none; animation:fadeIn 0.4s ease; }
+        .panel.active { display:block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .panel-box { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:36px; position:relative; overflow:hidden; }
+        .panel-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+        .panel-title { font-size:1.3rem; font-weight:700; margin-bottom:8px; }
+        .panel-sub { color:var(--text3); font-size:0.88rem; margin-bottom:28px; }
+        .form-group { margin-bottom:20px; }
+        .form-label { font-size:0.85rem; color:var(--text2); margin-bottom:8px; display:block; }
+        .form-input { width:100%; background:var(--input-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; color:var(--text); font-family:'Cairo',sans-serif; font-size:0.92rem; outline:none; transition:border-color 0.3s; }
+        .form-input:focus { border-color:var(--gold); }
+        .form-select { width:100%; background:var(--input-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; color:var(--text); font-family:'Cairo',sans-serif; font-size:0.92rem; outline:none; cursor:pointer; }
+        .form-select option { background:var(--bg); }
+        .options-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:20px; }
+        .option-check { display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--input-bg); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:border-color 0.3s; }
+        .option-check:hover { border-color:var(--gold); }
+        .option-check input { accent-color:var(--gold); width:16px; height:16px; }
+        .option-check span { font-size:0.88rem; color:var(--text2); }
+        .length-slider { width:100%; accent-color:var(--gold); margin:8px 0; }
+        .length-display { font-family:'Orbitron',monospace; font-size:1.5rem; color:var(--gold); text-align:center; margin:8px 0; }
+        .action-btn { width:100%; padding:16px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#000; font-family:'Cairo',sans-serif; font-size:1rem; font-weight:900; cursor:pointer; transition:transform 0.2s,box-shadow 0.3s; margin-top:8px; }
+        .action-btn:hover { transform:scale(1.02); box-shadow:0 0 25px rgba(255,215,0,0.35); }
+        .action-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+        .password-result { display:none; margin-top:24px; }
+        .password-display { background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; }
+        .password-text { font-family:'Orbitron',monospace; font-size:1.1rem; color:var(--gold); word-break:break-all; flex:1; letter-spacing:2px; }
+        .copy-btn { padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text2); font-family:'Cairo',sans-serif; font-size:0.8rem; cursor:pointer; transition:all 0.3s; white-space:nowrap; }
+        .copy-btn:hover { border-color:var(--gold); color:var(--gold); }
+        .strength-wrap { margin-top:16px; }
+        .strength-label { display:flex; justify-content:space-between; font-size:0.82rem; color:var(--text3); margin-bottom:8px; }
+        .strength-track { height:8px; background:rgba(255,255,255,0.06); border-radius:8px; overflow:hidden; }
+        .strength-fill { height:100%; border-radius:8px; transition:width 0.8s ease, background 0.8s; }
+        .strength-text { margin-top:8px; font-size:0.85rem; font-weight:700; }
+        .tips-result { display:none; margin-top:20px; }
+        .tip-card { background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.12); border-radius:12px; padding:16px; margin-bottom:12px; animation:fadeIn 0.4s ease; }
+        .tip-card h4 { color:var(--gold); font-size:0.92rem; margin-bottom:6px; }
+        .tip-card p { color:var(--text2); font-size:0.84rem; line-height:1.6; }
+        .loading-spinner { display:none; text-align:center; padding:20px; color:var(--text3); font-size:0.9rem; }
+        .spinner { width:36px; height:36px; border:3px solid rgba(255,215,0,0.1); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:rgba(255,215,0,0.2);border-radius:4px}
+        @media(max-width:768px){ nav{padding:14px 16px} .panels{padding:30px 16px 60px} .panel-box{padding:24px 16px} .options-grid{grid-template-columns:1fr} }
+    </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="grid-bg"></div>
+<div class="content">
+    <nav>
+        <div class="logo" onclick="window.location.href='/'">DRAGON<span>SHIELD</span></div>
+        <div class="nav-controls">
+            <button class="ctrl-btn" onclick="toggleLang()" id="langBtn">EN</button>
+            <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
+            <button class="back-btn" onclick="window.location.href='/'">← الرئيسية</button>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-badge"><span class="badge-dot"></span>مركز الحماية الرقمية</div>
+        <h1>حمِ <span class="highlight">حساباتك</span> بالذكاء الاصطناعي</h1>
+        <p>كل الأدوات اللي محتاجها عشان تأمن حياتك الرقمية في مكان واحد</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('password')" id="tab-password">🔐 مولّد الباسوردات</button>
+        <button class="tab" onclick="switchTab('strength')" id="tab-strength">💪 قوة الباسورد</button>
+        <button class="tab" onclick="switchTab('tips')" id="tab-tips">🤖 نصائح AI</button>
+        <button class="tab" onclick="switchTab('twofa')" id="tab-twofa">🔑 التحقق بخطوتين</button>
+    </div>
+
+    <div class="panels">
+        <div class="panel active" id="panel-password">
+            <div class="panel-box">
+                <div class="panel-title">🔐 مولّد الباسوردات بالذكاء الاصطناعي</div>
+                <div class="panel-sub">الـ AI بيولدلك باسورد قوي جداً مناسب لاحتياجك</div>
+                <div class="form-group">
+                    <label class="form-label">نوع الحساب</label>
+                    <select class="form-select" id="accountType">
+                        <option value="bank">🏦 حساب بنكي</option>
+                        <option value="social">📱 سوشيال ميديا</option>
+                        <option value="email">📧 إيميل</option>
+                        <option value="work">💼 عمل</option>
+                        <option value="gaming">🎮 جيمينج</option>
+                        <option value="general">🔒 عام</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">طول الباسورد: <span id="lengthVal">16</span> حرف</label>
+                    <input type="range" class="length-slider" id="lengthSlider" min="8" max="32" value="16" oninput="document.getElementById('lengthVal').textContent=this.value;document.getElementById('lengthDisplay').textContent=this.value">
+                    <div class="length-display" id="lengthDisplay">16</div>
+                </div>
+                <div class="options-grid">
+                    <label class="option-check"><input type="checkbox" id="useUpper" checked><span>أحرف كبيرة A-Z</span></label>
+                    <label class="option-check"><input type="checkbox" id="useLower" checked><span>أحرف صغيرة a-z</span></label>
+                    <label class="option-check"><input type="checkbox" id="useNumbers" checked><span>أرقام 0-9</span></label>
+                    <label class="option-check"><input type="checkbox" id="useSymbols" checked><span>رموز !@#$%</span></label>
+                </div>
+                <button class="action-btn" onclick="generatePassword()" id="genBtn">✨ ولّد باسورد بالـ AI</button>
+                <div class="loading-spinner" id="genLoading"><div class="spinner"></div><span>الـ AI بيولد أقوى باسورد...</span></div>
+                <div class="password-result" id="passwordResult">
+                    <div class="password-display">
+                        <div class="password-text" id="passwordText"></div>
+                        <button class="copy-btn" onclick="copyPassword()">نسخ 📋</button>
+                    </div>
+                    <div class="strength-wrap">
+                        <div class="strength-label"><span>قوة الباسورد</span><span id="strengthPercent"></span></div>
+                        <div class="strength-track"><div class="strength-fill" id="strengthFill"></div></div>
+                        <div class="strength-text" id="strengthText"></div>
+                    </div>
+                    <div id="aiAdvice" style="margin-top:16px;padding:16px;background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.15);border-radius:12px;font-size:0.85rem;color:var(--text2);line-height:1.7;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="panel-strength">
+            <div class="panel-box">
+                <div class="panel-title">💪 مدقق قوة الباسورد</div>
+                <div class="panel-sub">حط باسوردك وشوف مدى أمانه وإزاي تحسنه</div>
+                <div class="form-group">
+                    <label class="form-label">الباسورد</label>
+                    <input type="text" class="form-input" id="checkPassword" placeholder="ادخل باسوردك هنا..." oninput="checkStrength()">
+                </div>
+                <div class="strength-wrap" id="strengthResult" style="display:none">
+                    <div class="strength-label"><span>القوة</span><span id="checkPercent"></span></div>
+                    <div class="strength-track"><div class="strength-fill" id="checkFill"></div></div>
+                    <div class="strength-text" id="checkText" style="margin-bottom:16px"></div>
+                    <div id="strengthTips" style="display:flex;flex-direction:column;gap:8px"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="panel-tips">
+            <div class="panel-box">
+                <div class="panel-title">🤖 نصائح AI مخصصة</div>
+                <div class="panel-sub">قول للـ AI وضعك وهو يديك نصائح مخصصة ليك</div>
+                <div class="form-group">
+                    <label class="form-label">نوع حساباتك</label>
+                    <select class="form-select" id="tipsAccountType">
+                        <option value="personal">👤 شخصي عام</option>
+                        <option value="business">💼 أعمال وشركة</option>
+                        <option value="student">🎓 طالب</option>
+                        <option value="gamer">🎮 جيمر</option>
+                        <option value="elder">👴 كبير السن</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">أكتر حاجة بتستخدمها</label>
+                    <select class="form-select" id="tipsMainUse">
+                        <option value="social">سوشيال ميديا</option>
+                        <option value="banking">بنوك وفلوس</option>
+                        <option value="shopping">تسوق أونلاين</option>
+                        <option value="work">شغل وإيميلات</option>
+                        <option value="gaming">ألعاب</option>
+                    </select>
+                </div>
+                <button class="action-btn" onclick="getAITips()" id="tipsBtn">🤖 احصل على نصائح AI مخصصة</button>
+                <div class="loading-spinner" id="tipsLoading"><div class="spinner"></div><span>الـ AI بيحضر نصائح مخصصة ليك...</span></div>
+                <div class="tips-result" id="tipsResult"></div>
+            </div>
+        </div>
+
+        <div class="panel" id="panel-twofa">
+            <div class="panel-box">
+                <div class="panel-title">🔑 التحقق بخطوتين</div>
+                <div class="panel-sub">اختار التطبيق وهنشرحلك إزاي تفعّله خطوة خطوة</div>
+                <div class="form-group">
+                    <label class="form-label">اختار التطبيق</label>
+                    <select class="form-select" id="twofaApp" onchange="show2FA()">
+                        <option value="">-- اختار --</option>
+                        <option value="google">Google Account</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="twitter">X (Twitter)</option>
+                        <option value="snapchat">Snapchat</option>
+                    </select>
+                </div>
+                <div id="twofaSteps" style="display:none;margin-top:20px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // THEME
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    // LANGUAGE
+    let currentLang = localStorage.getItem('lang') || 'ar';
+
+    const texts = {
+        ar: {
+            tabs: ['🔐 مولّد الباسوردات','💪 قوة الباسورد','🤖 نصائح AI','🔑 التحقق بخطوتين'],
+            heroTitle: 'حمِ <span class="highlight">حساباتك</span> بالذكاء الاصطناعي',
+            heroSub: 'كل الأدوات اللي محتاجها عشان تأمن حياتك الرقمية في مكان واحد',
+            heroBadge: 'مركز الحماية الرقمية',
+            backBtn: '← الرئيسية',
+            panelTitles: ['🔐 مولّد الباسوردات بالذكاء الاصطناعي','💪 مدقق قوة الباسورد','🤖 نصائح AI مخصصة','🔑 التحقق بخطوتين'],
+            panelSubs: ['الـ AI بيولدلك باسورد قوي جداً مناسب لاحتياجك','حط باسوردك وشوف مدى أمانه وإزاي تحسنه','قول للـ AI وضعك وهو يديك نصائح مخصصة ليك','اختار التطبيق وهنشرحلك إزاي تفعّله خطوة خطوة'],
+            labels: ['نوع الحساب','طول الباسورد','الباسورد','نوع حساباتك','أكتر حاجة بتستخدمها','اختار التطبيق'],
+            checkOpts: ['أحرف كبيرة A-Z','أحرف صغيرة a-z','أرقام 0-9','رموز !@#$%'],
+            genBtn: '✨ ولّد باسورد بالـ AI',
+            tipsBtn: '🤖 احصل على نصائح AI مخصصة',
+            genLoading: 'الـ AI بيولد أقوى باسورد...',
+            tipsLoading: 'الـ AI بيحضر نصائح مخصصة ليك...',
+            copyBtn: 'نسخ 📋',
+            chars: 'حرف',
+            placeholder: 'ادخل باسوردك هنا...',
+        },
+        en: {
+            tabs: ['🔐 Password Generator','💪 Password Strength','🤖 AI Tips','🔑 Two-Factor Auth'],
+            heroTitle: 'Protect <span class="highlight">Your Accounts</span> with AI',
+            heroSub: 'All the tools you need to secure your digital life in one place',
+            heroBadge: 'Digital Protection Center',
+            backBtn: 'Home →',
+            panelTitles: ['🔐 AI Password Generator','💪 Password Strength Checker','🤖 Personalized AI Tips','🔑 Two-Factor Authentication'],
+            panelSubs: ['AI generates a strong password tailored to your needs','Enter your password and see how secure it is','Tell AI your situation and get personalized tips','Choose an app and we will guide you step by step'],
+            labels: ['Account Type','Password Length','Password','Account Type','Most Used Platform','Choose App'],
+            checkOpts: ['Uppercase A-Z','Lowercase a-z','Numbers 0-9','Symbols !@#$%'],
+            genBtn: '✨ Generate AI Password',
+            tipsBtn: '🤖 Get Personalized AI Tips',
+            genLoading: 'AI is generating the strongest password...',
+            tipsLoading: 'AI is preparing personalized tips for you...',
+            copyBtn: 'Copy 📋',
+            chars: 'chars',
+            placeholder: 'Enter your password here...',
+        }
+    };
+
+    function applyLang(lang) {
+        const tx = texts[lang];
+        const html = document.documentElement;
+        html.setAttribute('lang', lang);
+        html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        document.getElementById('langBtn').textContent = lang === 'ar' ? 'EN' : 'عر';
+        // Account Type options
+const accountTypeOpts = {
+    ar: ['🏦 حساب بنكي','📱 سوشيال ميديا','📧 إيميل','💼 عمل','🎮 جيمينج','🔒 عام'],
+    en: ['🏦 Bank Account','📱 Social Media','📧 Email','💼 Work','🎮 Gaming','🔒 General']
+};
+const tipsTypeOpts = {
+    ar: ['👤 شخصي عام','💼 أعمال وشركة','🎓 طالب','🎮 جيمر','👴 كبير السن'],
+    en: ['👤 Personal','💼 Business','🎓 Student','🎮 Gamer','👴 Elder']
+};
+const tipsUseOpts = {
+    ar: ['سوشيال ميديا','بنوك وفلوس','تسوق أونلاين','شغل وإيميلات','ألعاب'],
+    en: ['Social Media','Banking','Online Shopping','Work & Emails','Gaming']
+};
+const twofaOpts = {
+    ar: ['-- اختار --','Google Account','Facebook','Instagram','WhatsApp','X (Twitter)','Snapchat'],
+    en: ['-- Choose --','Google Account','Facebook','Instagram','WhatsApp','X (Twitter)','Snapchat']
+};
+
+[['accountType', accountTypeOpts],['tipsAccountType', tipsTypeOpts],['tipsMainUse', tipsUseOpts],['twofaApp', twofaOpts]].forEach(([id, opts]) => {
+    const sel = document.getElementById(id);
+    const current = sel.value;
+    sel.querySelectorAll('option').forEach((opt, i) => {
+        opt.textContent = opts[lang][i] || opt.textContent;
+    });
+});
+
+        // Tabs
+        ['tab-password','tab-strength','tab-tips','tab-twofa'].forEach((id, i) => {
+            document.getElementById(id).textContent = tx.tabs[i];
+        });
+
+        // Hero
+        document.querySelector('.hero h1').innerHTML = tx.heroTitle;
+        document.querySelector('.hero p').textContent = tx.heroSub;
+        document.querySelector('.hero-badge').innerHTML = `<span class="badge-dot"></span>${tx.heroBadge}`;
+        document.querySelector('.back-btn').textContent = tx.backBtn;
+
+        // Panel titles & subs
+        document.querySelectorAll('.panel-title').forEach((el, i) => el.textContent = tx.panelTitles[i]);
+        document.querySelectorAll('.panel-sub').forEach((el, i) => el.textContent = tx.panelSubs[i]);
+
+        // Labels
+        document.querySelectorAll('.form-label').forEach((el, i) => {
+            if (i === 1) {
+                el.innerHTML = `${tx.labels[i]}: <span id="lengthVal">${document.getElementById('lengthSlider').value}</span> ${tx.chars}`;
+            } else {
+                el.textContent = tx.labels[i] || el.textContent;
+            }
+        });
+
+        // Checkboxes
+        document.querySelectorAll('.option-check span').forEach((el, i) => el.textContent = tx.checkOpts[i]);
+
+        // Buttons
+        const genBtn = document.getElementById('genBtn');
+        if (!genBtn.disabled) genBtn.textContent = tx.genBtn;
+        const tipsBtn = document.getElementById('tipsBtn');
+        if (!tipsBtn.disabled) tipsBtn.textContent = tx.tipsBtn;
+
+        // Loading texts
+        document.querySelector('#genLoading span').textContent = tx.genLoading;
+        document.querySelector('#tipsLoading span').textContent = tx.tipsLoading;
+
+        // Copy btn
+        document.querySelector('.copy-btn').textContent = tx.copyBtn;
+
+        // Placeholder
+        document.getElementById('checkPassword').placeholder = tx.placeholder;
+    }
+
+    function toggleLang() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        applyLang(currentLang);
+        localStorage.setItem('lang', currentLang);
+    }
+
+    // Apply saved lang on load
+    if (currentLang === 'en') applyLang('en');
+
+    // TABS
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        document.getElementById('panel-' + tab).classList.add('active');
+    }
+
+    // PASSWORD GENERATOR
+    async function generatePassword() {
+        const length = document.getElementById('lengthSlider').value;
+        const accountType = document.getElementById('accountType').value;
+        const useUpper = document.getElementById('useUpper').checked;
+        const useLower = document.getElementById('useLower').checked;
+        const useNumbers = document.getElementById('useNumbers').checked;
+        const useSymbols = document.getElementById('useSymbols').checked;
+
+        if (!useUpper && !useLower && !useNumbers && !useSymbols) {
+            alert(currentLang === 'ar' ? 'اختار نوع واحد على الأقل!' : 'Choose at least one type!');
+            return;
+        }
+
+        document.getElementById('genBtn').disabled = true;
+        document.getElementById('genLoading').style.display = 'block';
+        document.getElementById('passwordResult').style.display = 'none';
+
+        let chars = '';
+        if (useUpper) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        if (useLower) chars += 'abcdefghijklmnopqrstuvwxyz';
+        if (useNumbers) chars += '0123456789';
+        if (useSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+        let password = '';
+        if (useUpper) password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+        if (useLower) password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+        if (useNumbers) password += '0123456789'[Math.floor(Math.random() * 10)];
+        if (useSymbols) password += '!@#$%^&*'[Math.floor(Math.random() * 8)];
+        for (let i = password.length; i < length; i++) password += chars[Math.floor(Math.random() * chars.length)];
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+        const accountNames = {
+            ar: { bank:'بنكي', social:'سوشيال ميديا', email:'إيميل', work:'عمل', gaming:'جيمينج', general:'عام' },
+            en: { bank:'banking', social:'social media', email:'email', work:'work', gaming:'gaming', general:'general' }
+        };
+
+        try {
+            const prompt = currentLang === 'ar'
+                ? `أنت خبير أمن معلومات. اكتب نصيحة قصيرة (3 جمل بالعربي) لحساب ${accountNames.ar[accountType]} عن إزاي يحافظ على باسورده بأمان. لا تذكر الباسورد.`
+                : `You are a security expert. Write a short tip (3 sentences in English) for a ${accountNames.en[accountType]} account about keeping the password safe. Don't mention the password.`;
+
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 300,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            const data = await res.json();
+            document.getElementById('aiAdvice').innerHTML = `🤖 <strong>${currentLang === 'ar' ? 'نصيحة الـ AI' : 'AI Tip'}:</strong><br>${data.content[0].text}`;
+        } catch(e) {
+            document.getElementById('aiAdvice').innerHTML = currentLang === 'ar'
+                ? '🤖 <strong>نصيحة:</strong> احفظ الباسورد في مكان آمن ولا تشاركه مع أي حد.'
+                : '🤖 <strong>Tip:</strong> Store your password securely and never share it.';
+        }
+
+        document.getElementById('genLoading').style.display = 'none';
+        document.getElementById('genBtn').disabled = false;
+        document.getElementById('genBtn').textContent = texts[currentLang].genBtn;
+        document.getElementById('passwordText').textContent = password;
+
+        const strength = calcStrength(password);
+        document.getElementById('strengthFill').style.width = strength.percent + '%';
+        document.getElementById('strengthFill').style.background = strength.color;
+        document.getElementById('strengthPercent').textContent = strength.percent + '%';
+        document.getElementById('strengthText').textContent = strength.label;
+        document.getElementById('strengthText').style.color = strength.color;
+        document.getElementById('passwordResult').style.display = 'block';
+    }
+
+    function calcStrength(password) {
+        let score = 0;
+        if (password.length >= 8) score += 20;
+        if (password.length >= 12) score += 20;
+        if (password.length >= 16) score += 10;
+        if (/[A-Z]/.test(password)) score += 15;
+        if (/[a-z]/.test(password)) score += 10;
+        if (/[0-9]/.test(password)) score += 15;
+        if (/[^A-Za-z0-9]/.test(password)) score += 10;
+        score = Math.min(score, 100);
+        let label, color;
+        if (score < 40) { label = currentLang === 'ar' ? '❌ ضعيف جداً' : '❌ Very Weak'; color = '#ff2d55'; }
+        else if (score < 60) { label = currentLang === 'ar' ? '⚠️ متوسط' : '⚠️ Medium'; color = '#FFA500'; }
+        else if (score < 80) { label = currentLang === 'ar' ? '✅ جيد' : '✅ Good'; color = '#FFD700'; }
+        else { label = currentLang === 'ar' ? '🔥 قوي جداً' : '🔥 Very Strong'; color = '#00ff88'; }
+        return { percent: score, label, color };
+    }
+
+    function copyPassword() {
+        const pwd = document.getElementById('passwordText').textContent;
+        navigator.clipboard.writeText(pwd).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = currentLang === 'ar' ? '✅ تم النسخ' : '✅ Copied!';
+            setTimeout(() => btn.textContent = texts[currentLang].copyBtn, 2000);
+        });
+    }
+
+    function checkStrength() {
+        const password = document.getElementById('checkPassword').value;
+        if (!password) { document.getElementById('strengthResult').style.display = 'none'; return; }
+        const strength = calcStrength(password);
+        document.getElementById('strengthResult').style.display = 'block';
+        document.getElementById('checkFill').style.width = strength.percent + '%';
+        document.getElementById('checkFill').style.background = strength.color;
+        document.getElementById('checkPercent').textContent = strength.percent + '%';
+        document.getElementById('checkText').textContent = strength.label;
+        document.getElementById('checkText').style.color = strength.color;
+
+        const tips = [];
+        if (password.length < 12) tips.push({ title: currentLang === 'ar' ? '📏 زود الطول' : '📏 Increase Length', text: currentLang === 'ar' ? 'استخدم 12 حرف على الأقل' : 'Use at least 12 characters' });
+        if (!/[A-Z]/.test(password)) tips.push({ title: currentLang === 'ar' ? '🔠 زود أحرف كبيرة' : '🔠 Add Uppercase', text: currentLang === 'ar' ? 'أضف حروف كبيرة زي A, B, C' : 'Add uppercase letters like A, B, C' });
+        if (!/[0-9]/.test(password)) tips.push({ title: currentLang === 'ar' ? '🔢 زود أرقام' : '🔢 Add Numbers', text: currentLang === 'ar' ? 'أضف أرقام في النص' : 'Add numbers to your password' });
+        if (!/[^A-Za-z0-9]/.test(password)) tips.push({ title: currentLang === 'ar' ? '✨ زود رموز' : '✨ Add Symbols', text: currentLang === 'ar' ? 'أضف رموز زي !@#$' : 'Add symbols like !@#$' });
+
+        document.getElementById('strengthTips').innerHTML = tips.map(t => `
+            <div style="padding:12px 16px;background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.1);border-radius:10px;">
+                <div style="font-size:0.88rem;font-weight:700;color:var(--gold);margin-bottom:4px">${t.title}</div>
+                <div style="font-size:0.82rem;color:var(--text2)">${t.text}</div>
+            </div>`).join('');
+    }
+
+    async function getAITips() {
+        const accountType = document.getElementById('tipsAccountType').value;
+        const mainUse = document.getElementById('tipsMainUse').value;
+        document.getElementById('tipsBtn').disabled = true;
+        document.getElementById('tipsLoading').style.display = 'block';
+        document.getElementById('tipsResult').style.display = 'none';
+
+        const prompt = currentLang === 'ar'
+            ? `أنت خبير أمن معلومات. المستخدم ${accountType} وبيستخدم الإنترنت لـ ${mainUse}. اكتب بالعربي 4 نصائح أمان مخصصة. كل نصيحة في سطر وتبدأ بـ [عنوان] ثم شرح.`
+            : `You are a security expert. The user is a ${accountType} who mainly uses the internet for ${mainUse}. Write 4 personalized security tips in English. Each tip on a new line starting with [Title] then explanation.`;
+
+        try {
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 600,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            const data = await res.json();
+            const lines = data.content[0].text.split('\n').filter(l => l.trim());
+            document.getElementById('tipsResult').innerHTML = lines.map(line => {
+                const match = line.match(/\[(.+?)\](.*)/);
+                if (match) return `<div class="tip-card"><h4>💡 ${match[1]}</h4><p>${match[2].trim()}</p></div>`;
+                return line.trim() ? `<div class="tip-card"><p>${line}</p></div>` : '';
+            }).join('');
+        } catch(e) {
+            document.getElementById('tipsResult').innerHTML = `<div class="tip-card"><p>${currentLang === 'ar' ? 'حصل خطأ، حاول تاني' : 'An error occurred, please try again'}</p></div>`;
+        }
+
+        document.getElementById('tipsResult').style.display = 'block';
+        document.getElementById('tipsLoading').style.display = 'none';
+        document.getElementById('tipsBtn').disabled = false;
+        document.getElementById('tipsBtn').textContent = texts[currentLang].tipsBtn;
+    }
+
+    const twofaData = {
+        ar: {
+            google: ['افتح myaccount.google.com','روح Security ثم 2-Step Verification','اضغط Get Started','اختار Google Authenticator أو SMS','اتبع الخطوات واحفظ الـ backup codes'],
+            facebook: ['افتح Settings & Privacy','اختار Settings','روح Security and Login','اضغط Use two-factor authentication','اختار Authentication App أو SMS'],
+            instagram: ['افتح الإعدادات','اضغط على Security','اختار Two-Factor Authentication','فعّل عن طريق Authentication App','احفظ الـ Recovery Codes'],
+            whatsapp: ['افتح الإعدادات','اضغط Account','اختار Two-step verification','اضغط Enable','ادخل PIN من 6 أرقام واحفظه'],
+            twitter: ['افتح Settings and Support','اختار Security and account access','اضغط Security','فعّل Two-factor authentication','اختار الطريقة المناسبة'],
+            snapchat: ['افتح الإعدادات','اضغط Two-Factor Authentication','اختار Continue','اختار SMS أو Authenticator App','اتبع الخطوات وتأكد']
+        },
+        en: {
+            google: ['Open myaccount.google.com','Go to Security then 2-Step Verification','Click Get Started','Choose Google Authenticator or SMS','Follow the steps and save backup codes'],
+            facebook: ['Open Settings & Privacy','Select Settings','Go to Security and Login','Click Use two-factor authentication','Choose Authentication App or SMS'],
+            instagram: ['Open Settings','Tap Security','Select Two-Factor Authentication','Enable via Authentication App','Save Recovery Codes'],
+            whatsapp: ['Open Settings','Tap Account','Select Two-step verification','Tap Enable','Enter a 6-digit PIN and save it'],
+            twitter: ['Open Settings and Support','Select Security and account access','Tap Security','Enable Two-factor authentication','Choose your preferred method'],
+            snapchat: ['Open Settings','Tap Two-Factor Authentication','Select Continue','Choose SMS or Authenticator App','Follow the steps to confirm']
+        }
+    };
+
+    function show2FA() {
+        const app = document.getElementById('twofaApp').value;
+        const div = document.getElementById('twofaSteps');
+        if (!app) { div.style.display = 'none'; return; }
+        const steps = twofaData[currentLang][app];
+        const doneText = currentLang === 'ar' ? '✅ بعد التفعيل هتكون محمي حتى لو حد عرف باسوردك!' : '✅ After activation you will be protected even if someone knows your password!';
+        const headerText = currentLang === 'ar' ? 'خطوات تفعيل التحقق بخطوتين:' : 'Steps to enable Two-Factor Authentication:';
+        div.innerHTML = `
+            <div style="margin-bottom:16px;font-size:0.9rem;color:var(--gold);font-weight:700">${headerText}</div>
+            ${steps.map((s, i) => `
+                <div style="display:flex;gap:12px;padding:14px 16px;background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.1);border-radius:10px;margin-bottom:10px;align-items:flex-start">
+                    <div style="font-family:'Orbitron',monospace;color:var(--gold);font-size:0.9rem;font-weight:700;min-width:28px">${String(i+1).padStart(2,'0')}</div>
+                    <div style="font-size:0.88rem;color:var(--text2);line-height:1.6">${s}</div>
+                </div>`).join('')}
+            <div style="margin-top:16px;padding:14px 16px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:0.84rem;color:var(--green)">${doneText}</div>`;
+        div.style.display = 'block';
+    }
+</script>
+</body>
+</html>

@@ -14,56 +14,31 @@ with open('model/phishing_model.pkl', 'rb') as f:
 HISTORY_FILE = 'model/history.json'
 
 TRUSTED_DOMAINS = [
-    # بحث وتكنولوجيا
     'google.com', 'bing.com', 'yahoo.com', 'duckduckgo.com', 'baidu.com',
     'microsoft.com', 'apple.com', 'amazon.com', 'adobe.com', 'oracle.com',
     'salesforce.com', 'ibm.com', 'intel.com', 'nvidia.com', 'amd.com',
-    
-    # سوشيال ميديا
     'facebook.com', 'instagram.com', 'twitter.com', 'x.com', 'linkedin.com',
     'tiktok.com', 'snapchat.com', 'pinterest.com', 'reddit.com', 'tumblr.com',
     'whatsapp.com', 'telegram.org', 'discord.com', 'twitch.tv',
-
-    # فيديو وترفيه
     'youtube.com', 'netflix.com', 'spotify.com', 'soundcloud.com',
     'vimeo.com', 'dailymotion.com', 'hulu.com', 'disneyplus.com',
-
-    # إيميل وتخزين
-    'gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'protonmail.com',
-    'icloud.com', 'dropbox.com', 'drive.google.com', 'onedrive.live.com',
-    'box.com', 'mega.nz',
-
-    # تطوير وتقنية
-    'github.com', 'gitlab.com', 'stackoverflow.com', 'dev.to',
-    'medium.com', 'hashnode.com', 'codepen.io', 'replit.com',
-    'heroku.com', 'onrender.com', 'vercel.app', 'netlify.app',
-    'cloudflare.com', 'aws.amazon.com', 'azure.microsoft.com',
-
-    # أخبار ومعلومات
+    'gmail.com', 'outlook.com', 'hotmail.com', 'protonmail.com',
+    'icloud.com', 'dropbox.com', 'box.com', 'mega.nz',
+    'github.com', 'gitlab.com', 'stackoverflow.com', 'medium.com',
+    'codepen.io', 'replit.com', 'heroku.com', 'onrender.com',
+    'vercel.app', 'netlify.app', 'cloudflare.com',
     'wikipedia.org', 'bbc.com', 'cnn.com', 'reuters.com', 'bloomberg.com',
-    'nytimes.com', 'theguardian.com', 'aljazeera.net', 'youm7.com',
-    'masrawy.com', 'elwatannews.com', 'shorouk news.com',
-
-    # تسوق
-    'amazon.com', 'ebay.com', 'aliexpress.com', 'noon.com', 'jumia.com',
-    'souq.com', 'namshi.com',
-
-    # بنوك وخدمات مالية
+    'nytimes.com', 'theguardian.com', 'aljazeera.net',
+    'youm7.com', 'masrawy.com', 'elwatannews.com',
+    'ebay.com', 'aliexpress.com', 'noon.com', 'jumia.com',
     'paypal.com', 'stripe.com', 'visa.com', 'mastercard.com',
     'cib.com.eg', 'nbe.com.eg', 'banquemisr.com',
-
-    # تعليم
     'coursera.org', 'udemy.com', 'edx.org', 'khanacademy.org',
-    'duolingo.com', 'quora.com', 'academia.edu',
-
-    # حكومة مصرية
+    'duolingo.com', 'quora.com',
     'egypt.gov.eg', 'moe.gov.eg', 'mohe.gov.eg',
-
-    # ذكاء اصطناعي
     'claude.ai', 'anthropic.com', 'openai.com', 'chatgpt.com',
-    'gemini.google.com', 'copilot.microsoft.com', 'huggingface.co',
+    'huggingface.co',
 ]
-
 
 def load_history():
     if os.path.exists(HISTORY_FILE):
@@ -74,7 +49,7 @@ def load_history():
 def save_history(entry):
     history = load_history()
     history.insert(0, entry)
-    history = history[:50]
+    history = history[:20]
     with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
         json.dump(history, f, ensure_ascii=False)
 
@@ -96,7 +71,6 @@ def is_trusted(url):
 def extract_features_from_url(url):
     hostname = get_hostname(url)
     path = '/'.join(url.split('/')[3:]) if len(url.split('/')) > 3 else ''
-
     features = {
         'length_url': len(url),
         'length_hostname': len(hostname),
@@ -128,8 +102,7 @@ def extract_features_from_url(url):
         'punycode': 1 if 'xn--' in url else 0,
         'port': 1 if re.search(r':\d{2,5}', hostname) else 0,
         'tld_in_path': 1 if re.search(r'\.(com|org|net|gov)', path) else 0,
-        'tld_in_subdomain': 0,
-        'abnormal_subdomain': 0,
+        'tld_in_subdomain': 0, 'abnormal_subdomain': 0,
         'nb_subdomains': len(hostname.split('.')) - 2 if len(hostname.split('.')) > 2 else 0,
         'prefix_suffix': 1 if '-' in hostname else 0,
         'random_domain': 0,
@@ -191,24 +164,23 @@ def get_risk_reasons(url):
 def home():
     return render_template('index.html')
 
+@app.route('/protect')
+def protect():
+    return render_template('protect.html')
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
     url = data.get('url', '').strip()
     if not url:
         return jsonify({'error': 'مفيش رابط!'})
-
     if not url.startswith('http'):
         url = 'https://' + url
-
     trusted = is_trusted(url)
     if trusted:
         result = {
-            'url': url,
-            'result': 'legitimate',
-            'confidence': 99.0,
-            'is_phishing': False,
-            'reasons': ['✅ موقع موثوق ومعروف عالمياً'],
+            'url': url, 'result': 'legitimate', 'confidence': 99.0,
+            'is_phishing': False, 'reasons': ['✅ موقع موثوق ومعروف عالمياً'],
             'time': datetime.now().strftime('%H:%M - %d/%m/%Y')
         }
     else:
@@ -219,14 +191,10 @@ def predict():
         is_phishing = prediction == 'phishing'
         reasons = get_risk_reasons(url) if is_phishing else ['✅ لم يتم اكتشاف أنماط مشبوهة']
         result = {
-            'url': url,
-            'result': 'phishing' if is_phishing else 'legitimate',
-            'confidence': confidence,
-            'is_phishing': is_phishing,
-            'reasons': reasons,
-            'time': datetime.now().strftime('%H:%M - %d/%m/%Y')
+            'url': url, 'result': 'phishing' if is_phishing else 'legitimate',
+            'confidence': confidence, 'is_phishing': is_phishing,
+            'reasons': reasons, 'time': datetime.now().strftime('%H:%M - %d/%m/%Y')
         }
-
     save_history(result)
     return jsonify(result)
 
@@ -235,6 +203,5 @@ def history():
     return jsonify(load_history())
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
